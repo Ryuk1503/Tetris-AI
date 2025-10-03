@@ -6,13 +6,13 @@ import random
 class tetrisUI:
 
     def __init__(self, root):
-        root.title("tetris Game")
-        root.geometry("1010x700")
+        root.title("Tetris Game")
+        root.geometry("1111x700")
         # Người chơi
         self.left_frame = tk.Frame(root, width=400, height=700, bg="#433C3C")
         self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=False)
-        # Điểm, next block,...
-        self.middle_frame = tk.Frame(root, width=200, height=700, bg="#EBEBEB")
+        # Điểm, next block,... (thêm viền đỏ cho middle_frame)
+        self.middle_frame = tk.Frame(root, width=200, height=700, bg="#EBEBEB", highlightbackground="#D33333", highlightthickness=6)
         self.middle_frame.pack(side=tk.LEFT, fill=tk.Y, expand=False)
         # AI
         self.right_frame = tk.Frame(root, width=400, height=700, bg="#433C3C")
@@ -27,74 +27,46 @@ class tetrisUI:
         )
         self.canvas.pack(fill=tk.BOTH, expand=True)
         # Label "Next block" phía trên canvas khối tiếp theo
-        self.next_label = tk.Label(self.middle_frame, text="Your next block", font=("Arial", 14, "bold"), bg="#EBEBEB")
+        self.next_label = tk.Label(self.middle_frame, text="Your next block", font=("Kenney Future Narrow", 14, "bold"), bg="#EBEBEB")
         self.next_label.pack(pady=(30, 5))
         # Khởi tạo canvas khối tiếp theo
-        self.next_canvas = tk.Canvas(self.middle_frame, width=130, height=130, bg="#EBEBEB", highlightthickness=2, highlightbackground="#333")
+        self.next_canvas = tk.Canvas(self.middle_frame, width=130, height=130, bg="#EBEBEB", highlightthickness=2, highlightbackground="#D33333")
         self.next_canvas.pack(pady=(0, 20), padx=40)
         # Biến lưu điểm của cả 2
         self.score_var = tk.IntVar(value=0)
         self.ai_score_var = tk.IntVar(value=0)
         # Label "AI SCORE"
-        self.ai_score_title = tk.Label(self.middle_frame, text="AI SCORE", font=("Arial", 14, "bold"), bg="#EBEBEB")
+        self.ai_score_title = tk.Label(self.middle_frame, text="AI SCORE", font=("Kenney Future Narrow", 14, "bold"), bg="#EBEBEB")
         self.ai_score_title.pack(pady=(0, 2))
         # Label hiển thị điểm của AI
-        self.ai_score_label = tk.Label(self.middle_frame, textvariable=self.ai_score_var, font=("Arial", 18), bg="#EBEBEB")
+        self.ai_score_label = tk.Label(self.middle_frame, textvariable=self.ai_score_var, font=("Kenney Future Narrow", 18), bg="#EBEBEB")
         self.ai_score_label.pack(pady=(0, 20))
         # Label "YOUR SCORE" phía trên điểm
-        self.score_title = tk.Label(self.middle_frame, text="YOUR SCORE", font=("Arial", 14, "bold"), bg="#EBEBEB")
+        self.score_title = tk.Label(self.middle_frame, text="YOUR SCORE", font=("Kenney Future Narrow", 14, "bold"), bg="#EBEBEB")
         self.score_title.pack(pady=(0, 2))
         # Label hiển thị điểm của bạn
-        self.score_label = tk.Label(self.middle_frame, textvariable=self.score_var, font=("Arial", 18), bg="#EBEBEB")
+        self.score_label = tk.Label(self.middle_frame, textvariable=self.score_var, font=("Kenney Future Narrow", 18), bg="#EBEBEB")
         self.score_label.pack(pady=(0, 10))
         # Credit
         self.credit_label = tk.Label(
             self.middle_frame,
-            text="Sản phẩm của nhóm 11:\nNguyễn Thanh Phúc - 23110140\nNguyễn Lê Hữu Hoàng - 23110099",
-            font=("Arial", 11, "italic"),
+            text="GROUP 11:\nNguyen Thanh Phuc - 23110140\nNguyen Le Huu Hoang - 23110099",
+            font=("Kenney Future Narrow", 11),
             bg="#EBEBEB",
             fg="#333"
         )
         self.credit_label.pack(side=tk.BOTTOM, pady=(40, 8))
 
-        self.button_frame = tk.Frame(self.middle_frame, bg="#EBEBEB")
-        self.button_frame.pack(pady=(0, 20))
-        # Menu chọn độ khó
-        self.difficulty_var = tk.StringVar(value="(Chọn độ khó)")
-        self.difficulty_menu = tk.OptionMenu(self.button_frame, self.difficulty_var, "Dễ", "Trung bình", "Khó")
-        self.difficulty_menu.config(font=("Arial", 12), width=13, bg="#F5F5F5")
-        self.difficulty_menu.pack(pady=5)
-        # Nút START
-        self.start_button = tk.Button(self.button_frame, text="START", font=("Arial", 12, "bold"), bg="#4CAF50", fg="white", command=self.start_game, width=15)
-        self.start_button.pack(pady=5)
-        # Nút LỊCH SỬ
-        self.history_button = tk.Button(self.button_frame, text="LỊCH SỬ", font=("Arial", 12, "bold"), bg="white", fg="black", highlightbackground="black", highlightcolor="black", highlightthickness=2, bd=0, command=self.show_history)
-        self.history_button.pack(pady=2)
+        # Đọc độ khó từ biến môi trường
+        import os
+        diff = os.environ.get("TETRIS_DIFFICULTY", "MEDIUM")
+        self.difficulty_var = tk.StringVar(value=diff)
 
         # Âm thanh khi hover
         import pygame
         pygame.mixer.init()
         self.hover_sound = pygame.mixer.Sound(r"d:/STUDY/Trí tuệ nhân tạo/Audio/click4.ogg")
 
-        # Nhạc nền loop khi chưa bắt đầu game
-        try:
-            pygame.mixer.music.load(r"d:/STUDY/Trí tuệ nhân tạo/Audio/06 - Continue.mp3")
-            pygame.mixer.music.play(-1)  # Loop liên tục
-        except Exception:
-            pass
-
-        def play_click_sound(event=None):
-            try:
-                self.hover_sound.play()
-            except Exception:
-                pass
-
-        self.start_button.bind('<Button-1>', play_click_sound)
-        self.history_button.bind('<Button-1>', play_click_sound)
-        self.difficulty_menu.bind('<Button-1>', play_click_sound)
-
-        # Lưu lịch sử game
-        self.game_history = []
 
         # Khởi tạo biến thời gian chơi
         self.start_time = None
@@ -120,16 +92,15 @@ class tetrisUI:
         # Gán đối thủ cho nhau
         self.game.opponent = self.ai_game
         self.ai_game.opponent = self.game
-        # Vẽ khung chuẩn bị ngay khi khởi tạo UI
-        self.draw_prepare_frame()
-
         # Khởi tạo AI controller cho tetrisGame AI
         self.ai_controller = AIController(self.ai_game)
         # Override spawn_block để AI tự động điều khiển mỗi lần spawn block
         def ai_spawn_block_and_play():
             tetrisGame.spawn_block(self.ai_game)
-            self.ai_game.canvas.after(450, self.ai_controller.start)
+            self.ai_game.canvas.after(500, self.ai_controller.start)
         self.ai_game.spawn_block = ai_spawn_block_and_play
+        # Tự động bắt đầu game khi khởi tạo UI
+        self.start_game()
 
         # Bind phím điều khiển
         root = self.canvas.winfo_toplevel()
@@ -153,10 +124,10 @@ class tetrisUI:
         x = root.winfo_x()
         y = root.winfo_y()
         # Chùng xuống 10px
-        root.geometry(f"1030x700+{x}+{y+10}")
+        root.geometry(f"1111x700+{x}+{y+10}")
         root.update()
         root.after(60)
-        root.geometry(f"1030x700+{x}+{y}")
+        root.geometry(f"1111x700+{x}+{y}")
         root.bind('<w>', lambda e: self.game.rotate_block())
 
     def shake_window(self):
@@ -168,101 +139,10 @@ class tetrisUI:
         for _ in range(10):
             dx = random.randint(-8, 8)
             dy = random.randint(-8, 8)
-            root.geometry(f"1030x700+{x+dx}+{y+dy}")
+            root.geometry(f"1111x700+{x+dx}+{y+dy}")
             root.update()
             root.after(12)
-        root.geometry(f"1030x700+{x}+{y}")
-
-    def draw_prepare_frame(self):
-        # Vẽ khung chuẩn bị cho canvas người chơi
-        line_y = self.game.LOSE_LINE_Y * self.game.BLOCK_SIZE
-        self.canvas.create_rectangle(
-            0, line_y, self.game.BOARD_WIDTH * self.game.BLOCK_SIZE, line_y + 4,
-            fill="#EBEBEB", outline="#EBEBEB", tags="block"
-        )
-        if self.game.LOSE_LINE_Y > 0:
-            self.canvas.create_rectangle(
-                0, 0,
-                self.game.BOARD_WIDTH * self.game.BLOCK_SIZE,
-                self.game.LOSE_LINE_Y * self.game.BLOCK_SIZE,
-                fill="#EBEBEB", outline="#EBEBEB", tags="block"
-            )
-        # Vẽ cho AI nếu có
-        if hasattr(self, 'ai_game') and self.ai_game:
-            line_y_ai = self.ai_game.LOSE_LINE_Y * self.ai_game.BLOCK_SIZE
-            self.ai_canvas.create_rectangle(
-                0, line_y_ai, self.ai_game.BOARD_WIDTH * self.ai_game.BLOCK_SIZE, line_y_ai + 4,
-                fill="#EBEBEB", outline="#EBEBEB", tags="block"
-            )
-            if self.ai_game.LOSE_LINE_Y > 0:
-                self.ai_canvas.create_rectangle(
-                    0, 0,
-                    self.ai_game.BOARD_WIDTH * self.ai_game.BLOCK_SIZE,
-                    self.ai_game.LOSE_LINE_Y * self.ai_game.BLOCK_SIZE,
-                    fill="#EBEBEB", outline="#EBEBEB", tags="block"
-                )
-
-    def show_history(self):
-        win = tk.Toplevel(self.button_frame)
-        win.title("Lịch sử chơi game")
-        win.geometry("700x500")
-        # Lấy root window để căn giữa
-        root = self.button_frame.winfo_toplevel()
-        root.update_idletasks()
-        root_x = root.winfo_x()
-        root_y = root.winfo_y()
-        root_w = root.winfo_width()
-        root_h = root.winfo_height()
-        popup_w, popup_h = 700, 500
-        x = root_x + (root_w - popup_w) // 2
-        y = root_y + (root_h - popup_h) // 2
-        win.geometry(f"{popup_w}x{popup_h}+{x}+{y}")
-        win.configure(bg="#f7f7f7")
-        if not self.game_history:
-            label = tk.Label(win, text="Lịch sử chơi game trống.", font=("Arial", 16, "italic"), bg="#f7f7f7")
-            label.place(relx=0.5, rely=0.5, anchor="center")
-            return
-        # Bọc bảng trong frame để căn giữa
-        table_frame = tk.Frame(win, bg="#f7f7f7")
-        table_frame.pack(pady=28)
-        # Header
-        header_bg = "#e0e0e0"
-        cell_opts = dict(height=2, padx=4, pady=2, font=("Arial", 12, "bold"), borderwidth=1, relief="solid", bg=header_bg, anchor="center")
-        tk.Label(table_frame, text="ID", width=5, **cell_opts).grid(row=0, column=0, sticky="nsew")
-        tk.Label(table_frame, text="Độ khó", width=10, **cell_opts).grid(row=0, column=1, sticky="nsew")
-        tk.Label(table_frame, text="Điểm của bạn", width=14, **cell_opts).grid(row=0, column=2, sticky="nsew")
-        tk.Label(table_frame, text="Điểm của AI", width=14, **cell_opts).grid(row=0, column=3, sticky="nsew")
-        tk.Label(table_frame, text="Tình trạng", width=12, **cell_opts).grid(row=0, column=4, sticky="nsew")
-        tk.Label(table_frame, text="Thời gian chơi", width=16, **cell_opts).grid(row=0, column=5, sticky="nsew")
-        # Dữ liệu
-        for idx, entry in enumerate(self.game_history, 1):
-            values = [
-                str(idx),
-                entry.get("difficulty", ""),
-                entry["player"],
-                entry["ai"],
-                entry.get("result", ""),
-                entry["time"]
-            ]
-            for col, val in enumerate(values):
-                tk.Label(
-                    table_frame,
-                    text=val,
-                    width=[5, 10, 14, 14, 12, 16][col],
-                    font=("Arial", 12),
-                    borderwidth=1,
-                    relief="solid",
-                    bg="white",
-                    anchor="center",
-                    padx=4,
-                    pady=4
-                ).grid(row=idx, column=col, sticky="nsew")
-        # Căn đều các cột
-        for col in range(6):
-            table_frame.grid_columnconfigure(col, weight=1)
-
-    def update_start_button_restart(self):
-        self.start_button.config(state="normal", text="RESTART")
+        root.geometry(f"1111x700+{x}+{y}")
 
     def start_game(self):
         import time
@@ -283,28 +163,34 @@ class tetrisUI:
             y = root_y + (root_h - popup_h) // 2
             win.geometry(f"{popup_w}x{popup_h}+{x}+{y}")
             win.configure(bg="#f7f7f7")
-            label = tk.Label(win, text="Bạn chưa chọn độ khó!", font=("Arial", 18, "bold"), bg="#f7f7f7", fg="#C00")
+            label = tk.Label(win, text="Bạn chưa chọn độ khó!", font=("Kenney Future Narrow", 18, "bold"), bg="#f7f7f7", fg="#C00")
             label.place(relx=0.5, rely=0.5, anchor="center")
             win.grab_set()
             return
-        import pygame
-        # Dừng nhạc nền khi bắt đầu game
-        try:
-            pygame.mixer.music.stop()
-        except Exception:
-            pass
-        # Nếu đang ở trạng thái game over (nút là RESTART), reset lại toàn bộ game
-        if self.start_button.cget("text") == "RESTART":
-            self.reset_game()
+
+        def countdown(n):
+            if n > 0:
+                lbl = tk.Label(self.middle_frame, text=str(n), font=("Kenney Future Narrow", 48, "bold"), fg="#D33333", bg="#EBEBEB")
+                lbl.place(relx=0.51, rely=0.6, anchor="center")
+                self.middle_frame.after(1000, lambda: [lbl.destroy(), countdown(n-1)])
+            else:
+                lbl = tk.Label(self.middle_frame, text="GO!", font=("Kenney Future Narrow", 48, "bold"), fg="#6EC6FF", bg="#EBEBEB")
+                lbl.place(relx=0.55, rely=0.6, anchor="center")
+                self.middle_frame.after(1000, lambda: [lbl.destroy(), self._start_game_real()])
+
         if not self.game_running:
-            self.game_running = True
-            self.game_paused = False
-            self.start_time = time.time()
-            self.game.spawn_block()
-            self.game.fall()
-            self.ai_game.spawn_block()
-            self.ai_game.fall()
-            self.start_button.config(state="disabled")
+            countdown(3)
+
+    def _start_game_real(self):
+        import time
+        self.game_running = True
+        self.game_paused = False
+        self.start_time = time.time()
+        self.game.spawn_block()
+        self.game.fall()
+        self.ai_game.spawn_block()
+        self.ai_controller.start()
+        self.ai_game.fall()
         
     def reset_game(self):
         # Xóa toàn bộ canvas
@@ -334,8 +220,6 @@ class tetrisUI:
         # Đặt lại trạng thái
         self.game_running = False
         self.game_paused = False
-        # Đặt lại nút
-        self.start_button.config(text="START")
 
 class tetrisGame:
     BLOCK_SIZE = 30
@@ -391,17 +275,22 @@ class tetrisGame:
                 msg = "YOU LOSE" if self.score_var else "YOU WIN"
                 win = tk.Toplevel(self.canvas)
                 win.title("Thông báo")
-                # Lấy root window
+                win.overrideredirect(True)  # Borderless window
                 root = self.canvas.winfo_toplevel()
                 root.update_idletasks()
                 root_x = root.winfo_x()
                 root_y = root.winfo_y()
                 root_w = root.winfo_width()
                 root_h = root.winfo_height()
-                popup_w, popup_h = 340, 220
-                x = root_x + (root_w - popup_w) // 2
+                popup_w, popup_h = 370, 320
+                x = root_x + (root_w - popup_w) // 2 + 10
                 y = root_y + (root_h - popup_h) // 2
                 win.geometry(f"{popup_w}x{popup_h}+{x}+{y}")
+                # Frame viền đỏ
+                border_frame = tk.Frame(win, bg="#D33333", width=popup_w, height=popup_h)
+                border_frame.pack(fill=tk.BOTH, expand=True)
+                inner = tk.Frame(border_frame, bg="#f7f7f7", width=popup_w-12, height=popup_h-12)
+                inner.place(x=6, y=6, width=popup_w-12, height=popup_h-12)
                 # Lấy điểm và thời gian
                 player_score = 0
                 ai_score = 0
@@ -414,33 +303,67 @@ class tetrisGame:
                         elapsed = int(time.time() - self.ui_ref.start_time)
                         m, s = divmod(elapsed, 60)
                         if m == 0:
-                            play_time = f"{s} giây"
+                            play_time = f"{s} s"
                         else:
-                            play_time = f"{m} phút {s} giây"
+                            play_time = f"{m} m {s} s"
                 # Hiển thị thông tin
-                label = tk.Label(win, text=msg, font=("Arial", 24, "bold"))
+                color = "#D33333" if msg == "YOU LOSE" else "#6EC6FF"
+                label = tk.Label(inner, text=msg, font=("Kenney Future Narrow", 24, "bold"), fg=color, bg="#f7f7f7")
                 label.pack(pady=(18, 8))
-                label1 = tk.Label(win, text=f"Điểm của bạn: {player_score}", font=("Arial", 15))
+                label1 = tk.Label(inner, text=f"Your Score: {player_score}", font=("Kenney Future Narrow", 15), bg="#f7f7f7")
                 label1.pack(pady=2)
-                label2 = tk.Label(win, text=f"Điểm của AI: {ai_score}", font=("Arial", 15))
+                label2 = tk.Label(inner, text=f"AI Score: {ai_score}", font=("Kenney Future Narrow", 15), bg="#f7f7f7")
                 label2.pack(pady=2)
-                label3 = tk.Label(win, text=f"Thời gian chơi: {play_time}", font=("Arial", 15))
+                label3 = tk.Label(inner, text=f"Play Time: {play_time}", font=("Kenney Future Narrow", 15), bg="#f7f7f7")
                 label3.pack(pady=2)
-                # Lưu lịch sử vào UI nếu có
-                if hasattr(self, 'ui_ref') and self.ui_ref:
-                    # Xác định độ khó
-                    difficulty = ""
-                    if hasattr(self.ui_ref, 'difficulty_var'):
-                        difficulty = self.ui_ref.difficulty_var.get()
-                    # Xác định tình trạng thắng/thua
-                    result = "Thắng" if (self.score_var and msg == "YOU WIN") or (self.ai_score_var and msg == "YOU LOSE") else "Thua"
-                    self.ui_ref.game_history.append({
+                # Buttons
+                def restart():
+                    win.destroy()
+                    if hasattr(self, 'ui_ref'):
+                        self.ui_ref.reset_game()
+                        self.ui_ref.start_game()
+                def main_menu():
+                    win.destroy()
+                    import subprocess, sys, os
+                    subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "start_screen.py")])
+                    root = self.canvas.winfo_toplevel()
+                    root.destroy()
+                btn_restart = tk.Button(inner, text="RESTART", font=("Kenney Future Narrow", 14, "bold"), bg="#6EC6FF", fg="white", command=restart, relief=tk.FLAT, width=16, height=1)
+                btn_restart.pack(pady=(18, 8), ipadx=8, ipady=4, fill=tk.X)
+                btn_menu = tk.Button(inner, text="MAIN MENU", font=("Kenney Future Narrow", 14, "bold"), bg="#D33333", fg="white", command=main_menu, relief=tk.FLAT, width=16, height=1)
+                btn_menu.pack(pady=(0, 10), ipadx=8, ipady=4, fill=tk.X)
+                # Lưu lịch sử vào file history.json
+                def save_history_entry(player_score, ai_score, difficulty, result, play_time):
+                    import json
+                    import os
+                    history_path = os.path.join(os.path.dirname(__file__), "history.json")
+                    entry = {
                         "player": player_score,
                         "ai": ai_score,
                         "difficulty": difficulty,
                         "result": result,
                         "time": play_time
-                    })
+                    }
+                    try:
+                        if os.path.exists(history_path):
+                            with open(history_path, "r", encoding="utf-8") as f:
+                                history = json.load(f)
+                        else:
+                            history = []
+                    except Exception:
+                        history = []
+                    history.append(entry)
+                    try:
+                        with open(history_path, "w", encoding="utf-8") as f:
+                            json.dump(history, f, ensure_ascii=False, indent=2)
+                    except Exception:
+                        pass
+
+                difficulty = ""
+                if hasattr(self, 'ui_ref') and hasattr(self.ui_ref, 'difficulty_var'):
+                    difficulty = self.ui_ref.difficulty_var.get()
+                result = "Win" if (self.score_var and msg == "YOU WIN") or (self.ai_score_var and msg == "YOU LOSE") else "Lose"
+                save_history_entry(player_score, ai_score, difficulty, result, play_time)
                 if self.score_var:
                     self.score_var.set(0)
                 elif self.ai_score_var:
@@ -449,9 +372,6 @@ class tetrisGame:
                 # Đồng bộ cờ với đối thủ nếu có
                 if hasattr(self, 'opponent') and self.opponent:
                     self.opponent.is_game_over_flag = True
-                # Enable nút Start và đổi thành Restart nếu có ui_ref
-                if hasattr(self, 'ui_ref') and self.ui_ref:
-                    self.ui_ref.update_start_button_restart()
                 return True
         return False
 
@@ -512,19 +432,19 @@ class tetrisGame:
     # Vẽ lại toàn bộ board và khối hiện tại lên canvas
     def draw_block(self):
         self.canvas.delete("block")
-        # Vẽ vạch thua trước, để các block nằm trên vạch thua
+        # Vẽ vạch thua màu đỏ, để các block nằm trên vạch thua
         line_y = tetrisGame.LOSE_LINE_Y * tetrisGame.BLOCK_SIZE
         self.canvas.create_rectangle(
             0, line_y, tetrisGame.BOARD_WIDTH * tetrisGame.BLOCK_SIZE, line_y + 4,
-            fill="#EBEBEB", outline="#EBEBEB", tags="block"
+            fill="#D33333", outline="#D33333", tags="block"
         )
-        # Vẽ nền trắng thuần phía trên vạch thua
+        # Vẽ nền trắng phía trên vạch thua (không viền)
         if tetrisGame.LOSE_LINE_Y > 0:
             self.canvas.create_rectangle(
                 0, 0,
                 tetrisGame.BOARD_WIDTH * tetrisGame.BLOCK_SIZE,
                 tetrisGame.LOSE_LINE_Y * tetrisGame.BLOCK_SIZE,
-                fill="#EBEBEB", outline="#EBEBEB", tags="block"
+                fill="#EBEBEB", outline="", tags="block"
             )
         # Vẽ các khối đã nằm dưới
         for y in range(tetrisGame.LOSE_LINE_Y, tetrisGame.BOARD_HEIGHT):
@@ -759,12 +679,6 @@ class tetrisGame:
             self.draw_block()
 
 class AIController:
-    """
-    AI heuristic cho Tetris: thử mọi vị trí và hướng xoay, chọn nước đi tốt nhất.
-    Score = w1 x LinesCleared + w2 x Height + w3 x Holes + w4 x Bumpiness
-
-    Nâng cấp: dùng Expectimax + Lookahead 1 khối tiếp theo.
-    """
     def __init__(self, game):
         self.game = game
         self.running = False
@@ -776,15 +690,16 @@ class AIController:
             return
         self.running = True
         # Lấy độ khó từ UI
-        difficulty = "Trung bình"
         if hasattr(self.game, 'ui_ref') and self.game.ui_ref:
             difficulty = self.game.ui_ref.difficulty_var.get()
-        if difficulty == "Dễ":
+        if difficulty == "EASY":
             self.plan_greedy_move()
-        elif difficulty == "Trung bình":
+        elif difficulty == "MEDIUM":
             self.plan_astar_move()
-        else:
+        elif difficulty == "HARD":
             self.plan_expectimax_move()
+        else:
+            self.plan_astar_move()
         self.do_move()
 
     def plan_greedy_move(self):
@@ -1067,17 +982,27 @@ class AIController:
         return True
 
     def heuristic(self, board):
-        # Pierre Dellacherie weights
-        w_lines = 1.0  
-        w_height = -0.5
-        w_holes = -0.7
-        w_bump = -0.2
-        w_covered_hole = -0.8 
 
         lines_cleared = self.count_lines(board)
         agg_height, bumpiness = self.get_heights_bump(board)
         holes = self.count_holes(board)
         covered_holes = self.count_covered_holes(board)
+        # Trọng số cơ bản (khi chiều cao thấp)
+        if agg_height <= self.game.BOARD_HEIGHT * self.game.BOARD_WIDTH * 0.6:
+            w_lines = 1.0  
+            w_height = -0.5
+            w_holes = -0.7
+            w_bump = -0.2
+            w_covered_hole = -0.8 
+        # Dynamically adjust weights if aggregate height is too high
+        elif agg_height > self.game.BOARD_HEIGHT * self.game.BOARD_WIDTH * 0.6:
+            # Board is getting dangerously high, prioritize lowering height and avoiding holes
+            w_height = -1.2
+            w_holes = -1.2
+            w_covered_hole = -1.5
+            w_lines = 1.2
+            w_bump = -0.3
+
         score = (w_lines * lines_cleared + w_height * agg_height + w_holes * holes + w_bump * bumpiness + w_covered_hole * covered_holes)
         return score
 
@@ -1141,9 +1066,9 @@ class AIController:
         if hasattr(self.game, 'ui_ref') and self.game.ui_ref:
             difficulty = self.game.ui_ref.difficulty_var.get()
         import random
-        if difficulty == "Khó":
+        if difficulty == "HARD":
             self.game.instant_drop()
-        elif difficulty == "Trung bình":
+        elif difficulty == "MEDIUM":
             # 25% xác suất dùng instant_drop
             if random.random() < 0.25:
                 self.game.instant_drop()
@@ -1152,7 +1077,10 @@ class AIController:
         else:
             self.game.set_fast(True)
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     start = tetrisUI(root)
     root.mainloop()
+
+if __name__ == "__main__":
+    main()
